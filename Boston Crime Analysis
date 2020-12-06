@@ -1,0 +1,104 @@
+Context
+Crime incident reports are provided by Boston Police Department (BPD) to document the initial details surrounding an incident to which BPD officers respond. This is a dataset containing records from the new crime incident report system, which includes a reduced set of fields focused on capturing the type of incident as well as when and where it occurred.
+
+Content
+Records begin in June 14, 2015 and continue to September 3, 2018.
+
+Acknowledgements
+The data is taken from Kaggle: https://www.kaggle.com/AnalyzeBoston/crimes-in-boston?select=offense_codes.csv
+
+Query1:
+Write a script that shows count of Auto Theft and Towed by Phase of Day(as index) vs Month(as
+column).
+
+Phase of day is defined as:
+Morning = 6 a.m to 11 a.m
+Noon = 11.01 a.m to 5 p.m
+Evening = 5.01 p.m to 8 p.m
+Night = 8.01 p.m to 5.59 a.m
+
+Sample Output:
+
+        Jan Feb March.......Dec
+Morning 1    2    3………………………2
+Noon    1    7    2………………………5
+Evening 9    2    3………………………2
+Night   11    2    3………………………2
+
+Solution1:
+
+with base as (
+SELECT  distinct 
+		(CASE 
+			WHEN TIME(OCCURRED_ON_DATE) BETWEEN '06:00:00' AND '11:00:00' 
+				THEN 'Morning'
+			WHEN TIME(OCCURRED_ON_DATE) BETWEEN '11:00:01' AND '17:00:00' 
+				THEN 'Noon'
+			WHEN TIME(OCCURRED_ON_DATE) BETWEEN '17:00:01' AND '20:00:00' 
+				THEN 'Evening'
+			WHEN TIME(OCCURRED_ON_DATE) BETWEEN '20:00:00' AND '24:00:00' 
+				THEN 'Night'
+			WHEN TIME(OCCURRED_ON_DATE) BETWEEN '00:00:00' AND '05:59:00' 
+				THEN 'Night'
+			ELSE 'NA'
+		END) AS phase_of_the_day,
+		COUNT(*) FILTER (WHERE "MONTH" =  1) AS jan,
+		COUNT(*) FILTER (WHERE "MONTH" =  2) AS Feb,
+		COUNT(*) FILTER (WHERE "MONTH" =  3) AS March,
+		COUNT(*) FILTER (WHERE "MONTH" =  4) AS April,
+		COUNT(*) FILTER (WHERE "MONTH" =  5) AS May,
+		COUNT(*) FILTER (WHERE "MONTH" =  6) AS June,
+		COUNT(*) FILTER (WHERE "MONTH" =  7) AS July,
+		COUNT(*) FILTER (WHERE "MONTH" =  8) AS Aug,
+		COUNT(*) FILTER (WHERE "MONTH" =  9) AS Sept,
+		COUNT(*) FILTER (WHERE "MONTH" =  10) AS Oct,
+		COUNT(*) FILTER (WHERE "MONTH" =  11) AS Nov,
+		COUNT(*) FILTER (WHERE "MONTH" =  12) AS Dec
+		from crime_v2 
+		WHERE OFFENSE_CODE_GROUP IN ('Auto Theft' , 'Towed')
+		group by 1
+)
+select * from base
+
+Query2:
+Write script to get offense (full offense name provided in offense_codes.csv file) per district
+which has maximum occurrence in respective district
+
+Solution2:
+
+WITH base as (
+SELECT distinct 
+		DISTRICT,
+		OFFENSE_CODE,
+		count(DISTINCT INCIDENT_NUMBER) as incident_count
+FROM crime_v2
+GROUP BY 1,2
+ORDER BY incident_count desc 
+),
+base1 as (
+SELECT 
+	DISTRICT, 
+	OFFENSE_CODE,
+	incident_count, 
+	RANK() OVER (PARTITION BY district ORDER BY incident_count desc) as r 
+FROM base
+)
+SELECT DISTINCT DISTRICT, OFFENSE_CODE, oc.NAME
+FROM base1 
+LEFT JOIN offense_codes oc
+	ON base1.OFFENSE_CODE = oc.CODE 
+WHERE r = 1
+
+
+Query3:
+Add a column to data set which contains date of last incidents happened in respective district
+For Example: if a state has N incidents, a column should be added to dataset with (i+1)th incident
+having date of ith incident in that column 
+
+Solution3:
+
+SELECT district,
+	   OCCURRED_ON_DATE as "current_incident",
+	   LEAD(OCCURRED_ON_DATE) OVER (PARTITION BY district ORDER BY OCCURRED_ON_DATE) as "next_incident" 
+FROM crime_v2
+
