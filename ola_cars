@@ -1,0 +1,57 @@
+--Imagine that I am a part of the OLA Finance Team. I want to unnderstand in India what is the revenue and
+--number of taxis of each cab type in India this month. Write a SQL Code to get the expected output from
+--table1 and table2. Be cautious if you are using simple join ('avoid using "union" as it is inefficient approach')
+
+#Creating Sample Tables
+create table Table1 ("Cab Type" varchar(30), Revenue int, City varchar(30));
+
+create table Table2 ("Cab Type" varhcar(30), "Number of taxis" int, District varchar(30));
+
+#Inserting values in the Tables
+
+INSERT INTO Table1 values ('Ola Prime', 2 , 'Bengaluru');
+INSERT INTO Table1 values ('Ola Prime', 3 , 'Chennai');
+INSERT INTO Table1 values ('Ola SUV', 1.2 , 'Delhi');
+INSERT INTO Table1 values ('Ola SUV', 4.4 , 'Mumbai');
+INSERT INTO Table1 values ('Ola SUV', 1.5 , 'Kolkatta');
+
+select * from Table2
+
+INSERT INTO Table2 values ('Ola Prime', 112 , 'Bengaluru');
+INSERT INTO Table2 values ('Ola Prime', 443 , 'Chennai');
+INSERT INTO Table2 values ('Ola SUV', 102 , 'Delhi');
+INSERT INTO Table2 values ('Ola SUV', 464 , 'Mumbai');
+INSERT INTO Table2 values ('Ola SUV', 124 , 'Surat');
+
+
+--Had to rename column as "Cab TYPE", type was being considered as a keyword and "Cab Type" was not being recognized
+as a word
+
+ALTER table table1 
+RENAME COLUMN "Cab Type" to "CabType" 
+
+ALTER table table2 
+RENAME COLUMN "Cab Type" to "CabType" 
+
+SELECT
+              t1."CabType" as "CabType",
+              t1.Revenue as "Revenue",
+              t2."Number of Taxis" as "Number of taxis" 
+FROM 
+           (SELECT 
+                          "CabType", 
+           	              "City", 
+                          SUM("Revenue") as "Revenue"
+           FROM Table1
+           GROUP BY 1,2
+           ) t1
+LEFT JOIN  
+          (SELECT 
+                        "CabType",
+                        "District",
+                         SUM("Number of taxis") as "Number of taxis"
+            FROM Table2
+            GROUP BY 1,2
+            ) t2
+    ON t1."CabType" = t2."CabType"
+       and t1."City" = t2."District"  
