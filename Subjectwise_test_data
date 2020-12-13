@@ -1,0 +1,115 @@
+##########################
+##Subjectwise Test Data##
+##########################
+
+CREATE TABLE sample_student1 (StudentID int, StudentName varchar(30), Subject varchar(30), Marks int, TestID int)
+
+INSERT INTO sample_student1 VALUES (1, 'John Deo','Subject1', 69,1);
+INSERT INTO sample_student1 VALUES (1, 'John Deo','Subject2', 94,1);
+INSERT INTO sample_student1 VALUES (1, 'John Deo','Subject3', 56,1);
+INSERT INTO sample_student1 VALUES (1, 'John Deo','Subject4', 82,1);
+INSERT INTO sample_student1 VALUES (1, 'John Deo','Subject1', 73,2);
+INSERT INTO sample_student1 VALUES (1, 'John Deo','Subject2', 68,2);
+INSERT INTO sample_student1 VALUES (1, 'John Deo','Subject3', 97,2);
+INSERT INTO sample_student1 VALUES (1, 'John Deo','Subject4', 77,2);
+
+INSERT INTO sample_student1 VALUES (2, 'Max Ruin','Subject1', 100,1);
+INSERT INTO sample_student1 VALUES (2, 'Max Ruin','Subject2', 81,1);
+INSERT INTO sample_student1 VALUES (2, 'Max Ruin','Subject3', 61,1);
+INSERT INTO sample_student1 VALUES (2, 'Max Ruin','Subject4', 85,1);
+INSERT INTO sample_student1 VALUES (2, 'Max Ruin','Subject1', 61,2);
+INSERT INTO sample_student1 VALUES (2, 'Max Ruin','Subject2', 78,2);
+INSERT INTO sample_student1 VALUES (2, 'Max Ruin','Subject3', 59,2);
+INSERT INTO sample_student1 VALUES (2, 'Max Ruin','Subject4', 97,2);
+
+INSERT INTO sample_student1 VALUES (3, 'Arnold','Subject1', 69,1);
+INSERT INTO sample_student1 VALUES (3, 'Arnold','Subject2', 91,1);
+INSERT INTO sample_student1 VALUES (3, 'Arnold','Subject3', 87,1);
+INSERT INTO sample_student1 VALUES (3, 'Arnold','Subject4', 62,1);
+INSERT INTO sample_student1 VALUES (3, 'Arnold','Subject1', 72,2);
+INSERT INTO sample_student1 VALUES (3, 'Arnold','Subject2', 83,2);
+INSERT INTO sample_student1 VALUES (3, 'Arnold','Subject3', 89,2);
+INSERT INTO sample_student1 VALUES (3, 'Arnold','Subject4', 72,2);
+
+INSERT INTO sample_student1 VALUES (4, 'Krish Star','Subject1', 70,1);
+INSERT INTO sample_student1 VALUES (4, 'Krish Star','Subject2', 52,1);
+INSERT INTO sample_student1 VALUES (4, 'Krish Star','Subject3', 82,1);
+INSERT INTO sample_student1 VALUES (4, 'Krish Star','Subject4', 53,1);
+INSERT INTO sample_student1 VALUES (4, 'Krish Star','Subject1', 92,2);
+INSERT INTO sample_student1 VALUES (4, 'Krish Star','Subject2', 73,2);
+INSERT INTO sample_student1 VALUES (4, 'Krish Star','Subject3', 63,2);
+INSERT INTO sample_student1 VALUES (4, 'Krish Star','Subject4', 85,2);
+
+INSERT INTO sample_student1 VALUES (5, 'John Mike','Subject1', 72,1);
+INSERT INTO sample_student1 VALUES (5, 'John Mike','Subject2', 63,1);
+INSERT INTO sample_student1 VALUES (5, 'John Mike','Subject3', 65,1);
+INSERT INTO sample_student1 VALUES (5, 'John Mike','Subject4', 61,1);
+INSERT INTO sample_student1 VALUES (5, 'John Mike','Subject1', 74,2);
+INSERT INTO sample_student1 VALUES (5, 'John Mike','Subject2', 59,2);
+INSERT INTO sample_student1 VALUES (5, 'John Mike','Subject3', 57,2);
+INSERT INTO sample_student1 VALUES (5, 'John Mike','Subject4', 69,2);
+
+
+
+-------
+Query1:
+-------
+--Write an sql query to get the aggregate marks that each student scored
+
+select StudentID, sum(Marks) from sample_student group by 1 
+
+-------
+Query2:
+-------
+--For each Subject, identify the maximum marks and the student that scored them
+
+select s1.Subject, s1.marks, s1.StudentName 
+from sample_student s1
+LEFT JOIN (select Subject, max(marks) as max_marks from sample_student group by 1) s2
+WHERE s1.Marks = s2.max_marks 
+	and s1.Subject = s2.Subject
+	
+-------
+Query3:
+-------
+--For each student and test, identify if his/her marks increased or decreased from the previous test	
+
+with base as (
+select 
+	StudentID, 
+	Subject,
+	TestID, 
+	Marks,
+	lag(Marks) over (PARTITION BY StudentID,Subject ORDER BY TestID) as prev_test_marks
+from sample_student
+)
+select 
+	StudentID,
+	Subject,
+	TestID,
+	(CASE
+		WHEN prev_test_marks > Marks 
+			THEN "Decrrease"
+		WHEN prev_test_marks < Marks 
+			THEN "Increase"
+		ELSE
+			"No Change"
+	 END) as marks_change_status
+from base
+where prev_test_marks IS NOT NULL
+
+
+-------
+Query4:
+-------
+--Show total marks distribution subject wise of all candidates
+select 
+	Subject,
+	StudentID,
+	Marks,
+	CUME_DIST() OVER (PARTITION BY Subject ORDER BY Marks) as dist,
+	AVG(Marks) OVER (PARTITION BY Subject) as avg_marks,
+	MIN(Marks) OVER (PARTITION BY Subject) as max_marks,
+	MAX(Marks) OVER (PARTITION BY Subject) as max_marks
+from sample_student
+order by Subject, dist  
