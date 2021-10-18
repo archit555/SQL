@@ -1,0 +1,50 @@
+##########################
+######Theater Plays ######
+##########################     
+      
+
+DROP TABLE plays
+
+CREATE Table plays (id int, title varchar(40), writer varchar(30));
+
+select * from plays
+
+INSERT INTO plays values (34, 'The opera of the Phantom','Lero Gastonx');
+INSERT INTO plays values (35, 'The legend of the cake','Oscar Glad');
+INSERT INTO plays values (36, 'Stone swords','Arthur King');
+
+---
+
+DROP Table reservations;
+
+CREATE Table reservations (id int, play_id int,number_of_tickets int, theater varchar(30));
+
+INSERT INTO reservations values (40, 34, 29,'The Jupiter Assembly');
+INSERT INTO reservations values (41, 34, 19,'The Jupiter Assembly');
+INSERT INTO reservations values (42, 34, 6,'The Jupiter Assembly');
+INSERT INTO reservations values (30, 35, 20,'The Legend Theater');
+INSERT INTO reservations values (31, 36, 21,'The Legend Theater');
+INSERT INTO reservations values (32, 35, 23,'The Legend Theater');
+INSERT INTO reservations values (33, 36, 19,'The Legend Theater');
+INSERT INTO reservations values (10, 36, 13,'Arthur King Theater');
+
+select * from reservations
+
+---
+
+Query:
+--Write a SQL query that counts the total number of tickets reserved for each play. The table of results should
+--contain three columns: id (if of play), title (title of play) and reserved_tickets (total number of tickets reserved
+--for each play 
+
+SELECT 
+	p.id as id, 
+	p.title as title,
+	COALESCE(SUM(number_of_tickets), 0) as "reserved_tickets"
+FROM plays p
+LEFT JOIN reservations r
+  ON p.id = r.play_id
+GROUP BY 1,2
+ORDER BY
+	"reserved_tickets" DESC,
+	p.id ASC
