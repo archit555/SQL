@@ -1,0 +1,30 @@
+#############
+##Athelete###
+#############
+
+
+DROP Table athlete 
+
+CREATE TABLE athlete (Name varchar(100), Country varchar(100), Height int)
+
+INSERT into athlete values ('Peter', 'Belgium', 173)
+INSERT into athlete values ('Wayne', 'England', 172)
+INSERT into athlete values ('Bruno', 'Portugal', 168)
+INSERT into athlete values ('Aaron', 'England', 180)
+INSERT into athlete values ('David', 'Spain', 171)
+INSERT into athlete values ('Karim', 'France', 182)
+
+SELECT * from athlete 
+
+-----
+
+--Find the number of players per country whose height is greater than 180
+
+SELECT Country, SUM(CASE WHEN Height > 180 THEN 1 ELSE 0 END) as count
+FROM athlete
+GROUP BY 1
+
+SELECT Country, SUM(Height > 180) as count
+FROM athlete
+GROUP BY 1
+
