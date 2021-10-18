@@ -1,0 +1,64 @@
+##########################
+####City wise Customer####
+##########################
+
+--Write a query that will return all cities with more customers than the average number of 
+--customers of all cities. For each city, return the country name, the city name and the 
+--number of customers. Order the result by country name ascending
+
+DROP TABLE country;
+DROP TABLE city;
+DROP TABLE customer;
+
+CREATE TABLE country (id int, country_name varchar(100));
+CREATE TABLE city (id int, city_name varchar(100), postal_code varchar(100), country_code int);
+CREATE TABLE customer (id int, customer_name varchar(100), city_id int, customer_address varchar(100), contact_person varchar(100), email varchar(100), phone int)
+
+select * from country;
+
+INSERT into country values (1, 'Austria');
+INSERT into country values (2, 'Germany');
+INSERT into country values (3, 'United Kingdom');
+
+select * from city;
+
+INSERT into city values (1,'Wein',1010,1);
+INSERT into city values (2, 'Berlin',10115,2);
+INSERT into city values (3, 'Hamburg',20095,2);
+INSERT into city values (4, 'London','EC4V 4AD',3);
+
+select * from customer;
+
+INSERT into customer values (1,'Drogerie Wein',1,'Deckergasse 15A','ddf Steinbach','Email@123',09423234)
+INSERT into customer values (2,'Watling Street 347',4,'sdd 15A','dass Steinbach','Email@123',09423234);
+INSERT into customer values (3,'Rothenbaucmchausse 53',3,'sdff 15A','asfad Steinbach','Email@123',09423234);
+INSERT into customer values (4,'Mozartbee 23',1,'kudbidf 15A',NULL,'Email@123',09423234);
+INSERT into customer values (5,'Krannert Stree',2,'ksabk 15A','dfsfa Steinbach','Email@123',09423234);
+INSERT into customer values (6,'Clarksfeild Rod',1,'javja 15A','afsfd Steinbach','Email@123',09423234);
+INSERT into customer values (7,'Unter Den Liden 1',4,'jasvjdsa 15A','dfdacda Steinbach','Email@123',09423234);
+INSERT into customer values (8,'Devonshire Street 92',2,'jasdhjads 15A','adfcd Steinbach','Email@123',09423234);
+INSERT into customer values (9,'karsplats',4,'sajddja 15A','daccada Steinbach','Email@123',09423234);
+
+
+--Query
+
+with average_customer_city as (
+select ROUND ((SELECT count(distinct id) FROM customer)*100 / (SELECT count(distinct id) FROM city),2)/100 as avg_customer_count
+),
+city_customer as 
+(
+SELECT country_name, city_name, COUNT(distinct customer.id) as customer_count
+FROM city
+LEFT JOIN customer 
+	ON city.id = customer.city_id
+LEFT JOIN country 
+	ON city.country_id = country.id
+GROUP BY 1,2
+)
+SELECT country_name, city_name, customer_count
+FROM city_customer
+CROSS JOIN average_customer_city
+WHERE customer_count > avg_customer_count
+ORDER BY country_name ASC
+
+select ROUND((SELECT count(distinct id) FROM customer)*100 / (SELECT count(distinct id) FROM city),2)
