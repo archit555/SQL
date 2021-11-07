@@ -1,0 +1,53 @@
+##########################
+######Survey Scores ######
+##########################     
+      
+
+DROP TABLE survey;
+
+CREATE Table survey (task_name varchar(40) not null, grade integer not null);
+
+select * from survey;
+
+--Data 1:
+INSERT INTO survey values ('HanoiTowers',5)
+INSERT INTO survey values ('BridgeWalk',8)
+INSERT INTO survey values ('BridgeWalk',7)
+INSERT INTO survey values ('HanoiTowers',1)
+INSERT INTO survey values ('BridgeWalk',9)
+
+--Data 2:
+
+Query:
+--Write an SQL query that assigns an average grade to check each task that has atleast three survey answers. Your query shoud
+--return a table containing two columns: 'task_name' and 'average_grade'. Rows should be ordered alphabetically by 'task_name'
+
+
+SELECT 
+	task_name,
+	AVG(grade) as average_grade
+FROM survey
+GROUP BY task_name
+HAVING count(task_name) >= 3
+ORDER BY task_name;
+
+
+--Data 2:
+
+DROP TABLE survey;
+
+CREATE Table survey (task_name varchar(40) not null, grade integer not null);
+
+
+INSERT INTO survey values ('Substring',8);
+INSERT INTO survey values ('Bank',1);
+INSERT INTO survey values ('Substring',9);
+INSERT INTO survey values ('Substring',10);
+INSERT INTO survey values ('Substring',6);
+INSERT INTO survey values ('Bank',9);
+INSERT INTO survey values ('Bank',5);
+INSERT INTO survey values ('Tree',3);
+INSERT INTO survey values ('Tree',3);
+INSERT INTO survey values ('Tree',3);
+
+select * from survey;
