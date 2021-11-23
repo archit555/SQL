@@ -53,6 +53,7 @@ from sales
 
 select distinct s1.name, s1.order_date, sum(s2.sales)
 from sales s1, sales s2
+	USING (name)
 where s1.order_date >= s2.order_date 
 and s1.name = s2.name 
 group by 1,2
