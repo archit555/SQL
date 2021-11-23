@@ -69,7 +69,23 @@ where
 -Highest Salary in each dept:
 SELECT s1.dept, s1.salary, s1.empid
 FROM sample s1
-LEFT JOIN 
-(SELECT dept, max(salary) as sal
-FROM sample GROUP by 1) s2
+	LEFT JOIN 
+		(SELECT dept, max(salary) as sal
+		FROM sample GROUP by 1) s2
 WHERE (s2.sal = s1.salary and s2.dept = s1.dept)
+
+
+--Highest Salary in each dept. using Rank:
+with base as 
+	(
+	SELECT 
+		dept, 
+		salary, 
+		empid,
+		rank() OVER (partition by dept order by salary desc) as r
+	FROM 
+		sample
+	)
+SELECT dept, salary, empid
+FROM base 
+where r = 1
