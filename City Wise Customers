@@ -39,8 +39,30 @@ INSERT into customer values (7,'Unter Den Liden 1',4,'jasvjdsa 15A','dfdacda Ste
 INSERT into customer values (8,'Devonshire Street 92',2,'jasdhjads 15A','adfcd Steinbach','Email@123',09423234);
 INSERT into customer values (9,'karsplats',4,'sajddja 15A','daccada Steinbach','Email@123',09423234);
 
+--Query 1
 
---Query
+WITH base as 
+	(
+	SELECT ROUND(COUNT(distinct cu.id)*100 / COUNT(distinct ci.id),2)/100  as avg_city_customer
+	FROM city ci
+	INNER JOIN customer cu
+		ON ci.id = cu.city_id 
+	),
+base1 as 
+	(
+	SELECT co.country_name, ci.city_name, COUNT(distinct cu.id)
+	FROM customer cu
+	LEFT JOIN city ci
+		ON ci.id = cu.city_id 
+	INNER JOIN country co
+		ON ci.country_code = co.id
+	GROUP BY 1,2
+	HAVING count(distinct cu.id) > (SELECT avg_city_customer FROM base)
+	ORDER BY 1 ASC
+	)
+SELECT distinct city_name from base1
+
+--Query 2
 
 with average_customer_city as (
 select ROUND ((SELECT count(distinct id) FROM customer)*100 / (SELECT count(distinct id) FROM city),2)/100 as avg_customer_count
