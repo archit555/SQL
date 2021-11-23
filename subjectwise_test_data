@@ -89,7 +89,7 @@ select
 	TestID,
 	(CASE
 		WHEN prev_test_marks > Marks 
-			THEN "Decrrease"
+			THEN "Decrease"
 		WHEN prev_test_marks < Marks 
 			THEN "Increase"
 		ELSE
