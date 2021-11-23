@@ -25,7 +25,7 @@ Noon    1    7    2………………………5
 Evening 9    2    3………………………2
 Night   11    2    3………………………2
 
-Solution1:
+Solution1 (Filter only supported in PostgreSQL, PIVOT keyword supported in SQL Server, other we use CASE WHEN:
 
 with base as (
 SELECT  distinct 
