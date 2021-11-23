@@ -65,3 +65,11 @@ where
                sample
              where
              sample.dept = t1.dept ORDER by salary desc limit 1 offset 1);
+	     
+-Highest Salary in each dept:
+SELECT s1.dept, s1.salary, s1.empid
+FROM sample s1
+LEFT JOIN 
+(SELECT dept, max(salary) as sal
+FROM sample GROUP by 1) s2
+WHERE (s2.sal = s1.salary and s2.dept = s1.dept)
