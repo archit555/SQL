@@ -28,3 +28,7 @@ SELECT Country, SUM(Height > 180) as count
 FROM athlete
 GROUP BY 1
 
+SELECT Country, COUNT(*)
+FROM athlete
+WHERE Height > 180
+GROUP BY Country
