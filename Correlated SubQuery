@@ -1,0 +1,35 @@
+****************************************
+Correlated SubQuery in the SELECT clause
+****************************************
+
+DROP table if exists orders
+DROP table if exists customers
+
+CREATE table orders (id int, cust_id int)
+
+CREATE table customers (id int, name varchar(10))
+
+INSERT into orders values (1,1)
+INSERT into orders values (2,1)
+INSERT into orders values (3,2)
+INSERT into orders values (4,3)
+INSERT into orders values (5,NULL)
+
+SELECT * from orders
+
+INSERT into customers values (1,'lara')
+INSERT into customers values (2,'Alamara')
+INSERT into customers values (3,'Aga')
+INSERT into customers values (4,'Aba')
+INSERT into customers values (5,'Aha')
+
+SELECT * FROM customers
+
+SELECT name, (select count(o.id) FROM orders o WHERE o.cust_id =  c.id) as order_count
+FROM customers c
+
+*********************************************************
+*Correlated subquery are slower compared to joins
+*They are used to simplify complex joins 
+*Inner query has a dependency on the outer query to run
+*********************************************************
