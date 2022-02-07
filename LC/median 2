@@ -1,0 +1,102 @@
+Table: Numbers
+
++-------------+------+
+| Column Name | Type |
++-------------+------+
+| num         | int  |
+| frequency   | int  |
++-------------+------+
+num is the primary key for this table.
+Each row of this table shows the frequency of a number in the database.
+ 
+
+The median is the value separating the higher half from the lower half of a data sample.
+
+Write an SQL query to report the median of all the numbers in the database after decompressing the Numbers table. Round the median to one decimal point.
+
+The query result format is in the following example.
+
+ 
+
+Example 1:
+
+Input: 
+Numbers table:
++-----+-----------+
+| num | frequency |
++-----+-----------+
+| 0   | 7         |
+| 1   | 1         |
+| 2   | 3         |
+| 3   | 1         |
++-----+-----------+
+Output: 
++--------+
+| median |
++--------+
+| 0.0    |
++--------+
+Explanation: 
+If we decompress the Numbers table, we will get [0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 3], so the median is (0 + 0) / 2 = 0.
+
+
+----
+
+CREATE TABLE Numbers  (num int, frequency int)
+
+INSERT into Numbers values (0,1)
+INSERT into Numbers values (1,1)
+INSERT into Numbers values (2,1)
+INSERT into Numbers values (3,1)
+INSERT into Numbers values (4,1)
+
+SELECT * from Numbers 
+
+WITH base as 
+(
+SELECT SUM(frequency) as f
+FROM Numbers
+),
+base1 as 
+(
+SELECT 
+    num,
+    frequency,
+    SUM(frequency) OVER (ORDER BY num ASC) as sum_freq
+FROM 
+    Numbers
+)
+,
+base2 as 
+(
+SELECT 
+    num,
+    frequency,
+    sum_freq,
+    LAG(sum_freq) OVER (ORDER BY sum_freq) as sum_freq_prev
+FROM 
+    base1
+)
+SELECT 
+	CASE 
+		WHEN (f % 2) = 0 
+			THEN 
+			  (SELECT 
+  				AVG(num)
+			  FROM 
+    			base2
+			  WHERE 
+			    ((f / 2) > IFNULL(sum_freq_prev,0) and (f / 2) <= sum_freq) OR 
+			    (((f / 2) + 1) > sum_freq_prev and ((f / 2) + 1) <= sum_freq)
+			  )
+		ELSE (SELECT 
+  				AVG(num)
+			  FROM 
+    			base2
+			  WHERE 
+			    ((f / 2) + 1) > IFNULL(sum_freq_prev,0) and ((f / 2) + 1) <= sum_freq
+			 )			
+	END as median
+FROM 
+	base
+	
