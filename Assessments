@@ -1,0 +1,78 @@
+-- On an online recruiting platform, each recruiting company can make a request for their candidate to complete
+--a personlized skill assessment. The assessment can contain tasks in three categories: SQL, Algo, Bug_Fixing 
+--Follwing the assessment, the company receives a report containing, for each candidate, their declared years
+--of experience (an integer between 0 to 100) and their score in each category. The score is the number of points
+--from 0 to 100 or NULL, which means there was no task in this category.
+
+
+You are given a table of assessments, with the following structure
+
+CREATE TABLE assessments (
+	id  integer not null,
+	experience integer not null,
+	sql integer,
+	algo integer,
+	bug_fixing integer,
+	unique(id)
+)
+
+INSERT into assessments values (1,3,100,null,50)
+INSERT into assessments values (2,5,null,100,100)
+INSERT into assessments values (3,1,100,100,100)
+INSERT into assessments values (4,5,100,50,null)
+INSERT into assessments values (5,5,100,100,100)
+
+SELECT * from assessments 
+
+--You are tasked to write an SQL query that, for each different length of experience , counts the number of candidates
+--with precisely the amount of experience and how many of them got a perfect score in each category in which they were
+--requested to solve tasks (so a NULL score is here treat as a perfect score)
+
+--You query should return a table containing the following columns: exp(each candidates years of experience), 
+--max(number of assessments achieving the maximum score), count(total number of assessments). Rows should be ordered
+--by decreasing exp
+
+--------------------------------------------------------------------------------------------------------------------
+
+--------------------------------------------
+| id | experience | sql | algo | bug_fixing |
+--------------------------------------------
+  1        3        100   NULL       50
+  2		   5        NULL  100        100
+  3        1        100   100        100
+  4        5        100   50         NULL
+  5        5        100   100        100
+  
+  your query should return:
+  
+  -------------------
+  |exp | max | count|
+  -------------------
+  	5 	  2		3
+  	3     0		1
+  	2     1		1
+
+
+--------------------------------------------------------------------------------------------------------------------
+WITH base as (
+SELECT experience, count(distinct id) as count
+FROM assessments 
+GROUP BY 1
+),
+base1 as (
+SELECT
+	experience,
+	SUM(CASE 
+		WHEN IFNULL(sql,100) = 100 AND IFNULL(algo,100) = 100 AND IFNULL(bug_fixing,100) = 100  
+			THEN 1 
+		ELSE 0
+	END	) as max
+FROM assessments 
+GROUP BY 1
+)
+
+SELECT base.experience , max, count
+FROM
+base INNER JOIN base1
+ON base.experience = base1.experience 
+ORDER BY base.experience desc
